@@ -9,3 +9,4 @@ hydra:
     cpus_per_task: 8
     array_parallelism: 8
     partition: cpu
+    timeout_min: 3600
