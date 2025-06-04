@@ -1,0 +1,11 @@
+# @package _global_
+
+defaults:
+  - override /hydra/launcher: submitit_slurm
+
+hydra:
+  launcher:
+    mem_gb: 32
+    cpus_per_task: 8
+    array_parallelism: 8
+    partition: cpu

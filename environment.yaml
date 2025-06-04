@@ -12,3 +12,4 @@ dependencies:
     - git+https://github.com/markovi/PyClick#pyclick
     - hydra-core
     - progress_table
+    - hydra-submitit-launcher
