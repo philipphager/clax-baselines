@@ -1,0 +1,14 @@
+name: clax-baselines
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - pypy3.9
+  - numpy
+  - pandas
+  - typer
+  - pip
+  - pip:
+    - git+https://github.com/markovi/PyClick#pyclick
+    - hydra-core
+    - progress_table
