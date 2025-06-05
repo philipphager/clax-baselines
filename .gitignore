@@ -1,4 +1,6 @@
 multirun/
 output/
+outputs
+
 .idea/
 *.csv
