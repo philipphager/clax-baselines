@@ -1,3 +1,4 @@
+from pathlib import Path
 from time import perf_counter
 from typing import List, Tuple
 
@@ -82,8 +83,12 @@ def main(config: DictConfig):
         }
     )
     logger.close()
+
+    result_dir = Path("results/")
+    result_dir.mkdir(exist_ok=True)
+
     df = logger.to_df()
-    df.to_csv(f"{config.model.lower()}_test.csv", index=False)
+    df.to_csv(result_dir / f"{config.model.lower()}_test.csv", index=False)
 
 
 if __name__ == '__main__':
