@@ -5,7 +5,7 @@ defaults:
 
 hydra:
   launcher:
-    mem_gb: 32
+    mem_gb: 64
     cpus_per_task: 8
     array_parallelism: 8
     partition: cpu
