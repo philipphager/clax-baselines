@@ -3,5 +3,5 @@ defaults:
 
 model: ???
 dataset: ???
-total_sessions: 1_000_000
+total_sessions: 10_000_000
 train_val_test_splits: [0.6, 0.2, 0.2]
