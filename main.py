@@ -74,7 +74,7 @@ def main(config: DictConfig):
     timer_stop = perf_counter()
     train_time = timer_stop - timer_start
 
-    val_df = evaluate(model_name, model, val_sessions, "test")
+    val_df = evaluate(model_name, model, val_sessions, "val")
 
     test_df = evaluate(model_name, model, test_sessions, "test")
     test_df["train_time_s"] = train_time
