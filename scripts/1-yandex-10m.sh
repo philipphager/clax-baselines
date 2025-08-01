@@ -17,6 +17,7 @@ python main.py -m \
   train_sessions=[10_000_000,20_000_000] \
   val_sessions=[20_000_000,25_000_000] \
   test_sessions=[25_000_000,30_000_000] \
+  eval_train_queries_only=True \
   $@
 
 python main.py -m \
@@ -26,4 +27,5 @@ python main.py -m \
   train_sessions=[20_000_000,30_000_000] \
   val_sessions=[30_000_000,35_000_000] \
   test_sessions=[35_000_000,40_000_000] \
+  eval_train_queries_only=True \
   $@
