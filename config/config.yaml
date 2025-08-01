@@ -2,6 +2,11 @@ defaults:
   - _self_
 
 model: ???
-dataset: ???
-total_sessions: 10_000_000
-train_val_test_splits: [0.6, 0.2, 0.2]
+dataset: "/Users/philipphager/Documents/GitHub/clax-datasets/data/wscd-2012/YandexClicks.txt"
+
+train_sessions: ???
+val_sessions: ???
+test_sessions: ???
+
+eval_train_queries_only: True
+experiment: ""

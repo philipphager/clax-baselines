@@ -1,6 +1,5 @@
 from pathlib import Path
 from time import perf_counter
-from typing import List, Tuple
 
 import hydra
 from omegaconf import DictConfig, OmegaConf
@@ -8,9 +7,9 @@ from progress_table import ProgressTable
 from pyclick.click_models import CM, PBM, UBM, DBN, SDBN, DCM, CCM
 from pyclick.click_models.CTR import GCTR, DCTR, RCTR
 from pyclick.click_models.Evaluation import LogLikelihood, Perplexity, PerplexityCond
-from pyclick.click_models.task_centric.TaskCentricSearchSession import \
-    TaskCentricSearchSession
-from pyclick.utils.YandexRelPredChallengeParser import YandexRelPredChallengeParser
+from pyclick.utils.Utils import Utils
+
+from dataset import YandexRelPredChallengeParser
 
 name2model = {
     "GCTR": GCTR,
@@ -25,33 +24,48 @@ name2model = {
     "CCM": CCM,
 }
 
+def evaluate(model_name, model, sessions, stage):
+    loglikelihood = LogLikelihood()
+    ppl = Perplexity()
+    cond_ppl = PerplexityCond()
 
-def train_val_test_split(
-        sessions: List[TaskCentricSearchSession],
-        splits: List[float]
-) -> Tuple[List, List, List]:
-    assert sum(splits) == 1.0, "train/val/test splits must sum to 1.0"
-
-    total_sessions = len(sessions)
-    n_train = int(total_sessions * splits[0])
-    n_val = int(total_sessions * splits[1])
-
-    return (
-        sessions[:n_train],
-        sessions[n_train:(n_train + n_val)],
-        sessions[(n_train + n_val):]
+    logger = ProgressTable(
+        columns=[
+            "model",
+            f"{stage}_ll",
+            f"{stage}_ppl",
+            f"{stage}_cond_ppl",
+        ],
     )
-
+    logger.update_from_dict(
+        {
+            "model": model_name,
+            f"{stage}_ll": loglikelihood.evaluate(model, sessions),
+            f"{stage}_ppl": ppl.evaluate(model, sessions)[0],
+            f"{stage}_cond_ppl": cond_ppl.evaluate(model, sessions)[0],
+        }
+    )
+    logger.close()
+    return logger.to_df()
 
 @hydra.main(config_name="config", config_path="config", version_base="1.2")
 def main(config: DictConfig):
     print(OmegaConf.to_yaml(config))
 
+    result_dir = Path(f"results/{config.experiment}")
+    result_dir.mkdir(exist_ok=True, parents=True)
+    model_name = config.model.lower()
+
     parser = YandexRelPredChallengeParser()
-    sessions = parser.parse(config.dataset, config.total_sessions)
-    train_sessions, _, test_sessions = train_val_test_split(
-        sessions, config.train_val_test_splits
-    )
+    train_sessions = parser.parse(config.dataset, sessions_range=config.train_sessions)
+    val_sessions = parser.parse(config.dataset, sessions_range=config.val_sessions)
+    test_sessions = parser.parse(config.dataset, sessions_range=config.test_sessions)
+
+    if config.eval_train_queries_only:
+        train_queries = Utils.get_unique_queries(train_sessions)
+        val_sessions = Utils.filter_sessions(val_sessions, train_queries)
+        test_sessions = Utils.filter_sessions(test_sessions, train_queries)
+        print(f"Evaluating only on train queries, {len(val_sessions)} val sessions, {len(test_sessions)} test sessions")
 
     model = name2model[config.model.upper()]()
 
@@ -60,35 +74,13 @@ def main(config: DictConfig):
     timer_stop = perf_counter()
     train_time = timer_stop - timer_start
 
-    loglikelihood = LogLikelihood()
-    ppl = Perplexity()
-    cond_ppl = PerplexityCond()
+    val_df = evaluate(model_name, model, val_sessions, "test")
 
-    logger = ProgressTable(
-        columns=[
-            "model",
-            "test_ll",
-            "test_ppl",
-            "test_cond_ppl",
-            "train_time_s",
-        ],
-    )
-    logger.update_from_dict(
-        {
-            "model": config.model.upper(),
-            "test_ll": loglikelihood.evaluate(model, test_sessions),
-            "test_ppl": ppl.evaluate(model, test_sessions)[0],
-            "test_cond_ppl": cond_ppl.evaluate(model, test_sessions)[0],
-            "train_time_s": train_time,
-        }
-    )
-    logger.close()
+    test_df = evaluate(model_name, model, test_sessions, "test")
+    test_df["train_time_s"] = train_time
 
-    result_dir = Path("results/")
-    result_dir.mkdir(exist_ok=True)
-
-    df = logger.to_df()
-    df.to_csv(result_dir / f"{config.model.lower()}_test.csv", index=False)
+    val_df.to_csv(result_dir / f"val_{model_name}.csv", index=False)
+    test_df.to_csv(result_dir / f"test_{model_name}.csv", index=False)
 
 
 if __name__ == '__main__':
