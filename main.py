@@ -80,7 +80,7 @@ def main(config: DictConfig):
     val_sessions = parser.parse(config.dataset, sessions_range=config.val_sessions)
     test_sessions = parser.parse(config.dataset, sessions_range=config.test_sessions)
 
-    if config.min_train_sessions_per_eval_query > 1:
+    if config.min_train_sessions_per_eval_query > 0:
         train_queries = get_unique_queries(
             train_sessions,
             min_sessions=config.min_train_sessions_per_eval_query,

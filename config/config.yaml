@@ -9,5 +9,5 @@ val_sessions: ???
 test_sessions: ???
 
 
-min_train_sessions_per_eval_query: 10
+min_train_sessions_per_eval_query: 1
 experiment: ""
