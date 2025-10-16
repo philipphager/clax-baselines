@@ -9,7 +9,7 @@ dependencies:
   - typer
   - pip
   - pip:
-    - git+https://github.com/markovi/PyClick#pyclick
+    - git+https://github.com/philipphager/PyClick#pyclick
     - hydra-core
     - progress_table
     - hydra-submitit-launcher
