@@ -2,7 +2,7 @@ defaults:
   - _self_
 
 model: ???
-dataset: "/Users/philipphager/Documents/GitHub/clax-datasets/data/wscd-2012/YandexClicks.txt"
+dataset: "/you/path/to/YandexClicks.txt"
 
 train_sessions: ???
 val_sessions: ???
